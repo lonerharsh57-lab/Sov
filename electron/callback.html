@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>sov — connecting…</title>
+<style>
+  body { background: #0a0d10; color: #f4f6f3;
+         font: 15px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+         display: grid; place-items: center; min-height: 100vh; margin: 0; }
+  p { max-width: 340px; text-align: center; padding: 0 20px; margin: 0; }
+</style>
+</head>
+<body>
+<p id="msg">Finishing Spotify login…</p>
+<script>
+(async () => {
+  const msg = document.getElementById("msg");
+  const q = new URLSearchParams(location.search);
+  const err = q.get("error");
+  if (err) {
+    msg.textContent = "Spotify login failed: " + (q.get("error_description") || err) + ". Close this window and try again in sov.";
+    return;
+  }
+  const code = q.get("code");
+  const state = q.get("state");
+  if (!code) {
+    msg.textContent = "No login code came back from Spotify. Close this window and try again in sov.";
+    return;
+  }
+  let verifier = null, savedState = null, clientId = null;
+  try {
+    verifier = localStorage.getItem("sov:pkce-verifier");
+    savedState = localStorage.getItem("sov:oauth-state");
+    clientId = localStorage.getItem("sov:client-id");
+  } catch (e) {
+    // Storage unavailable here — fall through to the server lookup.
+  }
+  if (!verifier || !savedState || savedState !== state) {
+    // The login started in the overlay window, so the verifier lives
+    // on the local server, not in this browser's storage.
+    try {
+      const r = await fetch("/api/login-state?state=" + encodeURIComponent(state || ""));
+      if (r.ok) {
+        const s = await r.json();
+        if (s.verifier) verifier = s.verifier;
+        if (s.clientId) clientId = s.clientId;
+      }
+    } catch (e) { /* fall through to the error below */ }
+  }
+  if (!verifier) {
+    msg.textContent = "This login window is stale (it does not match the login sov started). Close it and press Connect again in sov.";
+    return;
+  }
+  if (!clientId) {
+    try {
+      const r = await fetch("/api/config");
+      if (r.ok) {
+        const c = await r.json();
+        if (c.clientId) clientId = c.clientId;
+      }
+    } catch (e) { /* fall through to the error below */ }
+  }
+  if (!clientId) {
+    msg.textContent = "No Client ID found. Close this window, paste your Client ID in sov, and connect again.";
+    return;
+  }
+  let res;
+  try {
+    res = await fetch("https://accounts.spotify.com/api/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        client_id: clientId,
+        grant_type: "authorization_code",
+        code: code,
+        redirect_uri: "http://127.0.0.1:8888/callback",
+        code_verifier: verifier,
+      }),
+    });
+  } catch (e) {
+    msg.textContent = "Could not reach Spotify to finish the login. Check your connection and try again.";
+    return;
+  }
+  if (!res.ok) {
+    msg.textContent = "Spotify refused the login (" + res.status + "). Close this window and try again in sov.";
+    return;
+  }
+  const data = await res.json();
+  if (!data.access_token) {
+    msg.textContent = "Spotify did not return a token. Close this window and try again in sov.";
+    return;
+  }
+  const tokens = {
+    access_token: data.access_token,
+    refresh_token: data.refresh_token || "",
+    expires_at: Date.now() + (data.expires_in || 3600) * 1000,
+  };
+  try {
+    let prev = null;
+    try { prev = JSON.parse(localStorage.getItem("sov:tokens") || "null"); } catch (e) {}
+    if (!tokens.refresh_token && prev && prev.refresh_token) {
+      tokens.refresh_token = prev.refresh_token;
+    }
+    localStorage.setItem("sov:tokens", JSON.stringify(tokens));
+    localStorage.removeItem("sov:pkce-verifier");
+    localStorage.removeItem("sov:oauth-state");
+  } catch (e) {
+    // Storage unavailable in this browser — the server handoff below
+    // is what the overlay window uses, so keep going.
+  }
+  // Hand the tokens to the overlay window through the local server
+  // (the window's storage is separate from this browser's). The POST
+  // must carry the OAuth state: the server only accepts tokens for a
+  // state the callback recently consumed via /api/login-state, so a
+  // stray page can't plant tokens for the app to pick up.
+  try {
+    await fetch("/api/tokens", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...tokens, state: state }),
+    });
+  } catch (e) { /* localStorage above already has them for browser mode */ }
+  msg.textContent = "Connected! You can close this tab — sov will pick up the login.";
+  setTimeout(() => location.replace("/"), 1500);
+})();
+</script>
+</body>
+</html>

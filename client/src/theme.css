@@ -1,0 +1,146 @@
+@import "tailwindcss";
+@import "tailwindcss-safe-area";
+
+@theme {
+  --text-xs: 12px;
+  --text-xs--line-height: 16px;
+  --text-sm: 14px;
+  --text-sm--line-height: 20px;
+  --text-base: 16px;
+  --text-base--line-height: 24px;
+  --text-lg: 18px;
+  --text-lg--line-height: 28px;
+  --text-xl: 20px;
+  --text-xl--line-height: 28px;
+  --text-2xl: 24px;
+  --text-2xl--line-height: 32px;
+}
+
+:root {
+  color-scheme: dark;
+  --bg: #0a0d10;
+  --surface: rgba(16, 19, 22, 0.92);
+  --text: #f4f6f3;
+  --dim: #9aa39c;
+  --border: rgba(255, 255, 255, 0.1);
+  --accent: #1ed760;
+  --ring: #ffe81a;
+  --radius: 26px;
+  --space-surface: var(--surface);
+  --space-surface-alt: var(--surface);
+  --space-muted: var(--dim);
+  --space-border: var(--border);
+  --space-accent: var(--accent);
+  font-family: "Avenir Next", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Phone tap targets: at least 32px tall. */
+@layer base {
+  button, [role="button"], select, summary, input:not([type="checkbox"], [type="radio"]) {
+    min-height: 2rem;
+  }
+}
+
+input[type="range"].vol {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  outline: none;
+  min-height: 2rem;
+  background-clip: content-box;
+  padding: 14px 0;
+  box-sizing: border-box;
+}
+input[type="range"].vol::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #f4f6f3;
+  cursor: pointer;
+}
+input[type="range"].vol::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border: none;
+  border-radius: 50%;
+  background: #f4f6f3;
+  cursor: pointer;
+}
+
+/* Overlay grow/shrink: the panel springs out of the corner icon's spot
+   (the wrapper is anchored by its bottom-right corner) and eases back. */
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+    transform: scale(0.28) translateY(12px);
+    border-radius: 999px;
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    border-radius: 24px;
+  }
+}
+@keyframes overlay-out {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    border-radius: 24px;
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.28) translateY(12px);
+    border-radius: 999px;
+  }
+}
+@keyframes overlay-icon-in {
+  from {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.overlay-panel {
+  transform-origin: bottom right;
+  animation: overlay-in 0.34s cubic-bezier(0.34, 1.25, 0.4, 1) both;
+}
+.overlay-panel.closing {
+  animation: overlay-out 0.24s cubic-bezier(0.5, 0, 0.75, 0.4) both;
+}
+.overlay-icon {
+  transform-origin: bottom right;
+  animation: overlay-icon-in 0.26s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .overlay-panel,
+  .overlay-panel.closing,
+  .overlay-icon {
+    animation: none;
+  }
+}
+
+.lyric-line {
+  transition:
+    opacity 0.55s ease,
+    filter 0.55s ease,
+    font-size 0.55s ease,
+    color 0.55s ease;
+}
+.lyrics-track {
+  transition: transform 0.75s cubic-bezier(0.25, 0.9, 0.3, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .lyrics-track, .lyric-line { transition: none; }
+}

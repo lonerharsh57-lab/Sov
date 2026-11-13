@@ -1,0 +1,12 @@
+# Dependencies
+node_modules/
+
+# Electron packaging output (hundreds of MB, rebuilt with npm run pack)
+electron/release/
+
+# Installer: published as a GitHub Release asset, not committed
+installer/*.exe
+
+# Local backups / logs
+*.bak
+*.log

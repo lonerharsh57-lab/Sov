@@ -1,0 +1,54 @@
+{
+    "_asarUnpackNote": "uiohook-napi ships a native .node binary (prebuilds/win32-x64/uiohook-napi.node) that Node cannot load from inside asar, so the whole module plus node-gyp-build (its loader) stay unpacked; tray.png is read from disk by nativeImage.createFromPath in main.js, so it stays unpacked too.",
+    "_versionMapping": "package.json version 2026.11.13 (semver YYYY.MM.DD) = build stamp 2026-11-13m (server.js BUILD, footer) = installer DisplayVersion 2026-11-13m-electron (installer/sov-setup.nsi). Bump all three together; the letter suffix is the build revision within the day and has no slot in semver.",
+    "build": {
+        "appId": "com.sov.overlay",
+        "asar": true,
+        "asarUnpack": [
+            "node_modules/uiohook-napi/**/*",
+            "node_modules/node-gyp-build/**/*",
+            "tray.png"
+        ],
+        "directories": {
+            "output": "release"
+        },
+        "files": [
+            "main.js",
+            "preload.js",
+            "server.js",
+            "hotkey.js",
+            "callback.html",
+            "tray.png",
+            "package.json",
+            "dist/**/*",
+            "node_modules/uiohook-napi/dist/**/*",
+            "node_modules/uiohook-napi/prebuilds/win32-x64/**/*",
+            "node_modules/uiohook-napi/package.json",
+            "node_modules/node-gyp-build/**/*"
+        ],
+        "npmRebuild": false,
+        "productName": "sov",
+        "win": {
+            "artifactName": "${productName}-${version}-win32-x64",
+            "icon": "sov.ico",
+            "target": "dir"
+        }
+    },
+    "dependencies": {
+        "electron-updater": "^6.8.11",
+        "uiohook-napi": "^1.5.5"
+    },
+    "description": "sov — Spotify overlay (Electron shell)",
+    "devDependencies": {
+        "electron": "^38.8.6",
+        "electron-builder": "^26.18.0"
+    },
+    "main": "main.js",
+    "name": "sov",
+    "private": true,
+    "scripts": {
+        "pack": "electron-builder --win --x64 --dir",
+        "start": "electron ."
+    },
+    "version": "2026.11.13"
+}

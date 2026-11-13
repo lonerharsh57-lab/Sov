@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <style>
+      /* Transparent from the very first paint, before theme.css loads,
+         so the collapsed ring never flashes a dark box. */
+      html,
+      body {
+        background: transparent;
+      }
+    </style>
+    <link rel="icon" href="data:," />
+    <title>sov</title>
+    <link rel="stylesheet" href="/theme.css" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="/app.js"></script>
+  </body>
+</html>

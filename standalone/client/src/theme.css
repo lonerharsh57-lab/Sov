@@ -1,0 +1,110 @@
+@import "tailwindcss";
+@import "tailwindcss-safe-area";
+
+/* One type scale everywhere: 13px body, 11px secondary. */
+@theme {
+  --text-xs: 11px;
+  --text-xs--line-height: 15px;
+  --text-sm: 13px;
+  --text-sm--line-height: 18px;
+  --text-base: 13px;
+  --text-base--line-height: 18px;
+}
+
+:root {
+  color-scheme: dark;
+  /* Flat dark surface, one border, one accent. Nothing decorative. */
+  --surface: #0e1113;
+  --text: #f4f6f3;
+  --dim: #9aa39c;
+  --border: rgba(255, 255, 255, 0.14);
+  --accent: #1ed760;
+  font-family: "Avenir Next", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+/* No scrollbar anywhere — lists still scroll, the bar is just hidden. */
+* {
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* The window is transparent: the panel paints its own flat surface.
+   overflow hidden + height 100% so the page itself never scrolls. */
+html,
+body,
+#root {
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+}
+
+body {
+  color: var(--text);
+}
+
+/* High contrast: only the variables change, every component follows. */
+.high-contrast {
+  --text: #ffffff;
+  --dim: #d7ddd7;
+  --border: rgba(255, 255, 255, 0.38);
+  --surface: #06080a;
+  --accent: #4be584;
+}
+
+:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* The only transition in the UI: collapse/expand, 150ms. */
+.overlay-panel {
+  transition:
+    opacity 150ms ease,
+    transform 150ms ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .overlay-panel {
+    transition: none;
+  }
+}
+
+/* Sliders (volume, opacity, lyrics offset): flat track, small thumb. */
+input[type="range"].vol {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 3px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  background-clip: content-box;
+  padding: 10px 0;
+  box-sizing: border-box;
+}
+input[type="range"].vol::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--text);
+  cursor: pointer;
+}
+input[type="range"].vol::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  border: none;
+  border-radius: 50%;
+  background: var(--text);
+  cursor: pointer;
+}
+input[type="range"].vol:disabled {
+  opacity: 0.35;
+}
+
+/* Native selects/checkboxes follow the dark scheme. */
+select option {
+  background: var(--surface);
+  color: var(--text);
+}
